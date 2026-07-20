@@ -161,3 +161,8 @@ Net force sign (simplified):
 
 ```bash
 python main.py
+Enter the mission setup.
+
+Enter flight readings in chronological order.
+
+Continue until landing or manually end the mission.
