@@ -3,15 +3,16 @@ ASTRA SAT Flight Analyzer
 Version 0.2 — Extended Flight Physics
 
 ASTRA SAT accepts manually entered CanSat mission data,
-performs fundamental flight-physics calculations, identifies
-unsafe conditions, stores repeated readings in a mission
-timesheet, and produces a final mission summary.
+performs fundamental and extended flight-physics calculations,
+identifies unsafe conditions, stores repeated readings in a
+mission timesheet, and produces a final mission summary.
 """
 
 import math
 
 GRAVITY = 9.81
 SPECIFIC_GAS_CONSTANT_AIR = 287.05
+ABSOLUTE_ZERO_C = -273.15
 
 # ---------------------------------------------------------
 # INPUT FUNCTIONS
@@ -73,10 +74,13 @@ def collect_mission_setup():
     starting_battery = get_float_in_range("Starting battery (%): ", minimum=0, maximum=100)
 
     cansat_drag_coefficient = get_float_in_range(
-        "CanSat drag coefficient (Cd): ", minimum=0.0
+        "CanSat drag coefficient: ",
+        minimum=0.0001
     )
+
     parachute_drag_coefficient = get_float_in_range(
-        "Parachute drag coefficient (Cd): ", minimum=0.0
+        "Parachute drag coefficient: ",
+        minimum=0.0001
     )
 
     setup = {
@@ -98,11 +102,11 @@ def collect_mission_setup():
     setup["parachute_area"] = calculate_circle_area(setup["parachute_diameter"])
 
     print("\n=== Mission Setup Complete ===")
-    for key, value in setup.items():
-        if "area" in key:
-            print(f"{key.replace('_', ' ').title()}: {value:.4f} m²")
-        else:
-            print(f"{key.replace('_', ' ').title()}: {value}")
+    print(f"Mission Name: {mission_name}")
+    print(f"CanSat Cross-Sectional Area: {setup['cansat_area']:.4f} m²")
+    print(f"Parachute Area: {setup['parachute_area']:.4f} m²")
+    print(f"CanSat Drag Coefficient: {cansat_drag_coefficient}")
+    print(f"Parachute Drag Coefficient: {parachute_drag_coefficient}")
     print()
 
     return setup
@@ -124,11 +128,11 @@ def collect_flight_reading(previous_time=None):
     vertical_velocity = get_float("Vertical velocity (m/s): ")
     wind_speed = get_float_in_range("Wind speed (m/s): ", minimum=0)
     wind_direction = get_float_in_range("Wind direction (0–360°): ", minimum=0, maximum=360)
-    temperature = get_float("Temperature (°C): ")
 
-    while temperature <= -273.15:
-        print("Temperature cannot be at or below absolute zero (-273.15°C).")
-        temperature = get_float("Temperature (°C): ")
+    temperature = get_float_in_range(
+        "Temperature (°C): ",
+        minimum=ABSOLUTE_ZERO_C + 0.01
+    )
 
     pressure = get_float_in_range("Air pressure (Pa): ", minimum=0.0001)
     battery_level = get_float_in_range("Battery level (%): ", minimum=0, maximum=100)
@@ -152,47 +156,24 @@ def collect_flight_reading(previous_time=None):
 # PHYSICS CALCULATIONS
 # ---------------------------------------------------------
 
-def calculate_weight(mass):
-    return mass * GRAVITY
-
-def calculate_potential_energy(mass, altitude):
-    return mass * GRAVITY * altitude
-
-def calculate_kinetic_energy(mass, velocity):
-    return 0.5 * mass * velocity**2
-
-def calculate_momentum(mass, velocity):
-    return mass * velocity
-
-def estimate_landing_time(altitude, vertical_velocity):
-    if altitude <= 0:
-        return 0.0
-    if vertical_velocity >= 0:
-        return None
-    return altitude / abs(vertical_velocity)
-
-def estimate_wind_drift(wind_speed, landing_time):
-    if landing_time is None:
-        return None
-    return wind_speed * landing_time
-
-def calculate_acceleration(previous_reading, current_reading):
+def calculate_measured_acceleration(previous_reading, current_reading):
     if previous_reading is None:
         return None
 
-    change_in_velocity = (
+    delta_velocity = (
         current_reading["vertical_velocity"]
         - previous_reading["vertical_velocity"]
     )
-    change_in_time = (
+
+    delta_time = (
         current_reading["mission_time"]
         - previous_reading["mission_time"]
     )
 
-    if change_in_time <= 0:
+    if delta_time <= 0:
         return None
 
-    return change_in_velocity / change_in_time
+    return delta_velocity / delta_time
 
 def calculate_air_density(pressure, temperature_celsius):
     temperature_kelvin = temperature_celsius + 273.15
@@ -208,7 +189,7 @@ def calculate_drag_force(air_density, velocity, drag_coefficient, area):
 def calculate_net_vertical_force(weight, drag_force, vertical_velocity):
     if vertical_velocity < 0:
         return weight - drag_force
-    elif vertical_velocity > 0:
+    if vertical_velocity > 0:
         return weight + drag_force
     return weight
 
@@ -221,32 +202,52 @@ def calculate_physics(setup, reading, previous_reading):
     velocity = reading["vertical_velocity"]
     wind_speed = reading["wind_speed"]
 
-    weight = calculate_weight(mass)
-    potential_energy = calculate_potential_energy(mass, altitude)
-    kinetic_energy = calculate_kinetic_energy(mass, velocity)
-    momentum = calculate_momentum(mass, velocity)
-    landing_time = estimate_landing_time(altitude, velocity)
-    wind_drift = estimate_wind_drift(wind_speed, landing_time)
+    weight = mass * GRAVITY
+    potential_energy = mass * GRAVITY * altitude
+    kinetic_energy = 0.5 * mass * velocity**2
+    momentum = mass * velocity
 
-    measured_acceleration = calculate_acceleration(previous_reading, reading)
+    landing_time = (
+        altitude / abs(velocity)
+        if altitude > 0 and velocity < 0
+        else None
+    )
+
+    wind_drift = (
+        wind_speed * landing_time
+        if landing_time is not None
+        else None
+    )
+
+    measured_acceleration = calculate_measured_acceleration(previous_reading, reading)
     air_density = calculate_air_density(reading["pressure"], reading["temperature"])
 
     if reading["parachute_deployed"]:
         active_area = setup["parachute_area"]
-        drag_coefficient = setup["parachute_drag_coefficient"]
+        active_drag_coefficient = setup["parachute_drag_coefficient"]
+        active_configuration = "Parachute"
     else:
         active_area = setup["cansat_area"]
-        drag_coefficient = setup["cansat_drag_coefficient"]
+        active_drag_coefficient = setup["cansat_drag_coefficient"]
+        active_configuration = "CanSat body"
 
     drag_force = calculate_drag_force(
         air_density,
         velocity,
-        drag_coefficient,
-        active_area,
+        active_drag_coefficient,
+        active_area
     )
 
-    net_force = calculate_net_vertical_force(weight, drag_force, velocity)
-    force_acceleration = calculate_force_based_acceleration(net_force, mass)
+    net_vertical_force = calculate_net_vertical_force(
+        weight,
+        drag_force,
+        velocity
+    )
+
+    force_based_acceleration = calculate_force_based_acceleration(
+        net_vertical_force,
+        mass
+    )
 
     return {
         "weight": weight,
@@ -257,11 +258,12 @@ def calculate_physics(setup, reading, previous_reading):
         "wind_drift": wind_drift,
         "measured_acceleration": measured_acceleration,
         "air_density": air_density,
+        "active_configuration": active_configuration,
         "active_area": active_area,
-        "active_drag_coefficient": drag_coefficient,
+        "active_drag_coefficient": active_drag_coefficient,
         "drag_force": drag_force,
-        "net_force": net_force,
-        "force_acceleration": force_acceleration,
+        "net_vertical_force": net_vertical_force,
+        "force_based_acceleration": force_based_acceleration,
     }
 
 # ---------------------------------------------------------
@@ -313,7 +315,7 @@ def display_analysis(physics, warnings):
     print(f"Momentum: {physics['momentum']:.2f} kg·m/s")
 
     if physics["landing_time"] is None:
-        print("Estimated Landing Time: N/A (ascending)")
+        print("Estimated Landing Time: N/A")
         print("Estimated Wind Drift: N/A")
     else:
         print(f"Estimated Landing Time: {physics['landing_time']:.2f} s")
@@ -322,39 +324,15 @@ def display_analysis(physics, warnings):
     if physics["measured_acceleration"] is None:
         print("Measured Acceleration: N/A")
     else:
-        print(
-            f"Measured Acceleration: "
-            f"{physics['measured_acceleration']:.2f} m/s²"
-        )
+        print(f"Measured Acceleration: {physics['measured_acceleration']:.2f} m/s²")
 
-    if physics["air_density"] is None:
-        print("Air Density: N/A")
-    else:
-        print(
-            f"Air Density: "
-            f"{physics['air_density']:.3f} kg/m³"
-        )
-
-    print(
-        f"Active Area: "
-        f"{physics['active_area']:.4f} m²"
-    )
-    print(
-        f"Active Drag Coefficient: "
-        f"{physics['active_drag_coefficient']:.2f}"
-    )
-    print(
-        f"Drag Force: "
-        f"{physics['drag_force']:.2f} N"
-    )
-    print(
-        f"Net Vertical Force: "
-        f"{physics['net_force']:.2f} N"
-    )
-    print(
-        f"Force-Based Acceleration: "
-        f"{physics['force_acceleration']:.2f} m/s²"
-    )
+    print(f"Air Density: {physics['air_density']:.3f} kg/m³")
+    print(f"Active Configuration: {physics['active_configuration']}")
+    print(f"Active Area: {physics['active_area']:.4f} m²")
+    print(f"Active Drag Coefficient: {physics['active_drag_coefficient']:.2f}")
+    print(f"Drag Force: {physics['drag_force']:.2f} N")
+    print(f"Net Vertical Force: {physics['net_vertical_force']:.2f} N")
+    print(f"Force-Based Acceleration: {physics['force_based_acceleration']:.2f} m/s²")
 
     print("\nWarnings:")
     if warnings:
@@ -443,11 +421,10 @@ def main():
     mission_timesheet = []
 
     while True:
-        previous_time = mission_timesheet[-1]["reading"]["mission_time"] if mission_timesheet else None
         previous_reading = mission_timesheet[-1]["reading"] if mission_timesheet else None
+        previous_time = previous_reading["mission_time"] if previous_reading else None
 
         reading = collect_flight_reading(previous_time)
-
         physics = calculate_physics(setup, reading, previous_reading)
         warnings = generate_warnings(setup, reading)
 
