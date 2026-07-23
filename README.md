@@ -81,3 +81,9 @@ All values are validated.
 
 After the mission ends, the user may choose:
 
+Export mission data? (yes/no):
+
+If yes:
+
+### A CSV file is created in:
+
