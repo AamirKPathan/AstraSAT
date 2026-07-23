@@ -1,46 +1,76 @@
-# ASTRA SAT Flight Analyzer
+# ASTRA SAT Flight Analyzer  
+**Version 1.0 — Complete Manual Input Edition**
 
-**Version 0.3 — Data Export and Visualization**
+ASTRA SAT is a fully manual-input CanSat mission analyzer designed for science‑fair, competition, and educational use.  
+Version 1.0 represents the complete and final “manual edition” before the sensor‑integrated version begins.
 
-ASTRA SAT is a Python-based CanSat mission-logging and flight-analysis program.  
-It accepts manually entered mission and flight data, validates inputs, calculates physics values, identifies unsafe conditions, and produces a readable mission timesheet and final mission summary.
+This edition includes all features from v0.1–v0.3 plus major new capabilities such as vector wind drift, horizontal displacement tracking, terminal‑velocity estimation, mission‑phase classification, expanded warnings, full CSV export, full summary export, and a complete 10‑graph visualization suite.
 
-Version 0.3 adds **mission data export** and **graph generation**, allowing users to save results and visualize flight behavior.
+No hardware, sensors, radios, GPS, or telemetry are used in this edition.
 
 ---
 
-# What’s New in Version 0.3
+# What’s New in Version 1.0
 
-Version 0.3 introduces:
+### ✔ Vector-based wind drift (north/east components)  
+### ✔ Cumulative horizontal position tracking  
+### ✔ Horizontal displacement and landing-direction estimate  
+### ✔ Terminal-velocity estimation (body + parachute)  
+### ✔ Mission-phase classification  
+### ✔ Expanded safety warnings  
+### ✔ Expanded data-integrity warnings  
+### ✔ Full mission summary export  
+### ✔ Complete CSV export (all physics + positions + phases)  
+### ✔ 10-graph visualization set  
+### ✔ Polished menus and program flow  
+### ✔ Complete documentation and test campaign  
 
-### ✔ CSV export of mission readings  
-### ✔ Export of mission setup metadata  
-### ✔ Altitude vs time graph  
-### ✔ Vertical velocity vs time graph  
-### ✔ Battery level vs time graph  
-### ✔ Measured acceleration vs time graph  
-### ✔ Graph folder (`data/graphs/`)  
-### ✔ Export confirmation prompts  
-### ✔ Graph generation confirmation prompts  
+This is the final feature-complete manual-input version.
 
-These features make ASTRA SAT more useful for analysis, reporting, and science fair or competition documentation.
+---
+
+# Manual Edition Scope
+
+### Included:
+- All v0.1–v0.3 features  
+- Vector wind drift  
+- Horizontal displacement coordinates  
+- Mission-phase classification  
+- Terminal velocity  
+- Improved warnings  
+- Data consistency checks  
+- Final landing-location estimate  
+- Complete CSV export  
+- Complete graph set  
+- Polished menus and output  
+- Documentation, tests, and release  
+
+### Not Included (reserved for sensor edition):
+- Physical sensors  
+- Arduino / Raspberry Pi  
+- GPS hardware  
+- Radio telemetry  
+- Live data streaming  
+- GUI  
+- Database or cloud storage  
 
 ---
 
 # Mission Setup Inputs
 
-- mission name  
+- Mission name  
 - CanSat mass (kg)  
 - CanSat diameter (m)  
-- parachute diameter (m)  
-- starting altitude (m)  
-- safe landing speed (m/s)  
-- maximum safe wind speed (m/s)  
-- minimum safe temperature (°C)  
-- maximum safe temperature (°C)  
-- starting battery (%)  
+- Parachute diameter (m)  
+- Starting altitude (m)  
+- Safe landing speed (m/s)  
+- Maximum safe wind speed (m/s)  
+- Minimum safe temperature (°C)  
+- Maximum safe temperature (°C)  
+- Recommended minimum parachute altitude (m)  
+- Starting battery (%)  
 - CanSat drag coefficient  
-- parachute drag coefficient  
+- Parachute drag coefficient  
 
 All values are validated.
 
@@ -48,125 +78,101 @@ All values are validated.
 
 # Flight Reading Inputs
 
-- mission time (s) — must increase each reading  
-- altitude (m)  
-- vertical velocity (m/s)  
-- wind speed (m/s)  
-- wind direction (0–360°)  
-- temperature (°C) — cannot be ≤ −273.15°C  
-- air pressure (Pa)  
-- battery level (%)  
-- parachute deployed (yes/no)  
-- notes  
+Each reading includes:
+
+- Mission time (s)  
+- Altitude (m)  
+- Vertical velocity (m/s)  
+- Wind speed (m/s)  
+- Wind direction (0–360°)  
+- Temperature (°C)  
+- Pressure (Pa)  
+- Battery level (%)  
+- Parachute deployed (yes/no)  
+- Notes  
+
+Mission time must increase each reading.
 
 ---
 
-# Physics Calculations (from Version 0.2)
+# Physics Calculations
 
-- measured acceleration between readings  
-- air density from pressure and temperature  
-- CanSat and parachute cross-sectional areas  
-- drag force using active configuration  
-- net vertical force  
-- force-based acceleration  
-- potential energy  
-- kinetic energy  
-- momentum  
-- estimated landing time  
-- estimated wind drift  
+### Core physics:
+- Weight  
+- Potential energy  
+- Kinetic energy  
+- Momentum  
+- Air density  
+- Drag force  
+- Net vertical force  
+- Force-based acceleration  
+- Measured acceleration  
+- Estimated landing time  
 
----
+### Wind physics:
+- North wind velocity  
+- East wind velocity  
+- North drift  
+- East drift  
+- Total wind drift  
 
-# CSV Export (Version 0.3)
+### Horizontal position:
+- Cumulative north position  
+- Cumulative east position  
+- Total horizontal displacement  
 
-After the mission ends, the user may choose:
-
-Export mission data? (yes/no):
-
-If yes:
-
-### A CSV file is created in:
-
-data/<mission_name>.csv
-
-
-### Columns include:
-
-- reading_number  
-- mission_time  
-- altitude  
-- vertical_velocity  
-- measured_acceleration  
-- wind_speed  
-- wind_direction  
-- temperature  
-- pressure  
-- air_density  
-- battery_level  
-- parachute_deployed  
-- weight  
-- potential_energy  
-- kinetic_energy  
-- momentum  
-- landing_time  
-- wind_drift  
-- drag_force  
-- net_vertical_force  
-- force_based_acceleration  
-- warnings  
-- notes  
-
-This file contains the complete time-series data for the mission.
+### Terminal velocity:
+- CanSat body terminal velocity  
+- Parachute terminal velocity  
+- Safety check against landing-speed limit  
 
 ---
 
-# Mission Setup Export (Version 0.3)
+# Mission Phase Classification
 
-A second file is created:
+Each reading is classified as:
 
-data/<mission_name>_setup.txt
+- Pre-launch  
+- Ascending  
+- Apogee  
+- Descending  
+- Parachute descent  
+- Stationary  
+- Landed  
+- Invalid data  
 
-This contains:
-
-- mission name  
-- mass  
-- CanSat diameter  
-- parachute diameter  
-- CanSat area  
-- parachute area  
-- drag coefficients  
-- starting altitude  
-- starting battery  
-- safe landing speed  
-- maximum safe wind  
-- safe temperature range  
-
-This file stores all configuration values separately from the readings.
+Displayed after every reading and exported to CSV.
 
 ---
 
-# Graph Generation (Version 0.3)
+# Warnings
 
-If the user agrees:
+Warnings are grouped into:
 
-Generate mission graphs? (yes/no):
+### Safety warnings:
+- Unsafe descent speed  
+- Unsafe wind  
+- Unsafe temperature  
+- Low battery  
+- Parachute terminal velocity unsafe  
+- Parachute not deployed below recommended altitude  
 
-ASTRA SAT generates four PNG graphs:
+### Data warnings:
+- Mission time not increasing  
+- Battery increasing  
+- Contradictory altitude/velocity  
+- Parachute deployed during ascent  
+- Extreme acceleration  
+- Unrealistic velocity change  
+- Pressure outside typical range  
+- Temperature near unrealistic values  
 
-### ✔ Altitude vs time  
-### ✔ Vertical velocity vs time  
-### ✔ Battery level vs time  
-### ✔ Measured acceleration vs time  
+### Mission status:
+- Landing detected  
+- Safe landing  
+- Unsafe landing  
 
-Graphs are saved in:
-
-data/graphs/
-
-Acceleration graph automatically skips the first reading (because acceleration is undefined).
-
-If fewer than two valid acceleration points exist:
-
-Not enough data to create acceleration graph.
+All warnings appear in the timesheet, summary, and CSV.
 
 ---
 
@@ -174,79 +180,167 @@ Not enough data to create acceleration graph.
 
 Each reading includes:
 
-- reading number  
-- mission time  
-- altitude  
-- vertical velocity  
-- wind speed  
-- wind direction  
-- temperature  
-- pressure  
-- battery  
-- parachute status  
-- warnings  
-- notes  
+- Reading number  
+- Mission time  
+- Altitude  
+- Vertical velocity  
+- Wind speed + direction  
+- Temperature  
+- Pressure  
+- Battery  
+- Parachute status  
+- Mission phase  
+- North/East position  
+- Horizontal displacement  
+- Warnings  
+- Notes  
 
 ---
 
-# Mission Summary
+# Final Mission Summary
 
 Includes:
 
-- mission name  
-- total readings  
-- final mission time  
-- starting altitude  
-- maximum altitude  
-- final altitude  
-- starting battery  
-- final battery  
-- battery used  
-- minimum battery  
-- maximum wind speed  
-- maximum descent speed  
-- warnings issued  
-- landing classification  
+- Mission name  
+- Total readings  
+- Total mission time  
+- Maximum altitude  
+- Apogee time  
+- Maximum ascent speed  
+- Maximum descent speed  
+- Maximum measured acceleration  
+- Average wind speed  
+- Maximum wind speed  
+- Minimum battery  
+- Battery consumed  
+- Maximum drag force  
+- Maximum net force  
+- Estimated terminal velocity  
+- Final north position  
+- Final east position  
+- Total horizontal displacement  
+- Estimated landing direction  
+- Total safety warnings  
+- Total data warnings  
+- Final mission result  
+
+Also exported to:
+
+```
+data/<mission_name>_summary.txt
+```
 
 ---
 
-# Version 0.3 Limitations
+# CSV Export
 
-- CSV export does not include graphs  
-- Graphs use simple line plots  
-- No GUI  
-- No real sensor integration  
-- Wind direction is not used in force calculations  
-- Atmospheric conditions assumed constant per reading  
-- Acceleration graph requires at least two valid points  
+CSV includes:
+
+- All reading inputs  
+- All physics values  
+- All wind components  
+- All drifts  
+- All positions  
+- Mission phase  
+- Terminal velocity  
+- Horizontal displacement  
+- All warnings  
+- Notes  
+
+Saved as:
+
+```
+data/<mission_name>.csv
+```
 
 ---
 
-# How to Run
+# Graph Set (10 Graphs)
 
-1. Install Python 3  
-2. Install Matplotlib:
+Generated graphs:
 
+1. Altitude vs time  
+2. Vertical velocity vs time  
+3. Measured acceleration vs time  
+4. Battery vs time  
+5. Temperature vs time  
+6. Pressure vs time  
+7. Air density vs time  
+8. Drag force vs time  
+9. Net vertical force vs time  
+10. Horizontal flight path (east vs north)
+
+Saved in:
+
+```
+data/graphs/
+```
+
+Graphs skip gracefully if insufficient data exists.
+
+---
+
+# Program Flow
+
+1. Welcome screen  
+2. Mission setup  
+3. Setup confirmation  
+4. Repeated flight readings  
+5. Analysis after each reading  
+6. Automatic landing detection or manual end  
+7. Mission timesheet  
+8. Final mission summary  
+9. Export prompt  
+10. Graph-generation prompt  
+11. Completion message  
+
+---
+
+# Installation
+
+Requires Python 3 and Matplotlib:
+
+```
 pip install matplotlib
+```
 
-3. Run:
+Run:
 
+```
 python main.py
-
-4. Enter mission setup  
-5. Enter flight readings  
-6. Export data and generate graphs if desired  
+```
 
 ---
 
-# Future Versions
+# Known Limitations
 
-Version 0.4 may include:
+- Manual input only  
+- No real sensors  
+- No GPS  
+- No radio telemetry  
+- No GUI  
+- No real-time tracking  
+- No database or cloud storage  
 
-- wind vector physics  
-- improved drag modeling  
-- CSV import  
-- multi-mission comparison  
+These belong to the future **sensor-integrated edition**.
+
+---
+
+# Sensor Edition Roadmap (Next Project)
+
+- Real sensor input  
+- Arduino / Raspberry Pi integration  
+- GPS tracking  
+- Radio telemetry  
+- Live graphing  
+- Real-time landing prediction  
+- Onboard data logging  
 - GUI dashboard  
-- 3D descent visualization  
+
+---
+
+# License
+
+Educational use permitted.  
+Not intended for real aerospace navigation or safety-critical deployment.
 
