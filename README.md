@@ -149,3 +149,14 @@ This file stores all configuration values separately from the readings.
 
 If the user agrees:
 
+Generate mission graphs? (yes/no):
+
+ASTRA SAT generates four PNG graphs:
+
+### ✔ Altitude vs time  
+### ✔ Vertical velocity vs time  
+### ✔ Battery level vs time  
+### ✔ Measured acceleration vs time  
+
+Graphs are saved in:
+
