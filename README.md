@@ -160,3 +160,9 @@ ASTRA SAT generates four PNG graphs:
 
 Graphs are saved in:
 
+data/graphs/
+
+Acceleration graph automatically skips the first reading (because acceleration is undefined).
+
+If fewer than two valid acceleration points exist:
+
