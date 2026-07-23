@@ -1,14 +1,17 @@
 """
 ASTRA SAT Flight Analyzer
-Version 0.2 — Extended Flight Physics
+Version 0.3 — Data Export and Visualization
 
-ASTRA SAT accepts manually entered CanSat mission data,
-performs fundamental and extended flight-physics calculations,
-identifies unsafe conditions, stores repeated readings in a
-mission timesheet, and produces a final mission summary.
+Adds:
+- CSV export of mission readings
+- Export of mission setup metadata
+- Altitude, velocity, battery, and acceleration graphs
 """
 
 import math
+import csv
+import os
+import matplotlib.pyplot as plt
 
 GRAVITY = 9.81
 SPECIFIC_GAS_CONSTANT_AIR = 287.05
@@ -23,7 +26,7 @@ def get_float(prompt):
         try:
             return float(input(prompt))
         except ValueError:
-            print("Invalid number. Please try again.")
+            print("Invalid number. Try again.")
 
 def get_float_in_range(prompt, minimum=None, maximum=None):
     while True:
@@ -38,10 +41,10 @@ def get_float_in_range(prompt, minimum=None, maximum=None):
 
 def get_yes_no(prompt):
     while True:
-        answer = input(prompt).strip().lower()
-        if answer in ("yes", "y"):
+        ans = input(prompt).strip().lower()
+        if ans in ("yes", "y"):
             return True
-        if answer in ("no", "n"):
+        if ans in ("no", "n"):
             return False
         print("Please enter yes or no.")
 
@@ -68,19 +71,16 @@ def collect_mission_setup():
     max_safe_temp = get_float("Maximum safe temperature (°C): ")
 
     while max_safe_temp <= min_safe_temp:
-        print("Maximum temperature must exceed minimum temperature.")
+        print("Maximum temperature must exceed minimum.")
         max_safe_temp = get_float("Maximum safe temperature (°C): ")
 
     starting_battery = get_float_in_range("Starting battery (%): ", minimum=0, maximum=100)
 
     cansat_drag_coefficient = get_float_in_range(
-        "CanSat drag coefficient: ",
-        minimum=0.0001
+        "CanSat drag coefficient: ", minimum=0.0001
     )
-
     parachute_drag_coefficient = get_float_in_range(
-        "Parachute drag coefficient: ",
-        minimum=0.0001
+        "Parachute drag coefficient: ", minimum=0.0001
     )
 
     setup = {
@@ -98,12 +98,12 @@ def collect_mission_setup():
         "parachute_drag_coefficient": parachute_drag_coefficient,
     }
 
-    setup["cansat_area"] = calculate_circle_area(setup["cansat_diameter"])
-    setup["parachute_area"] = calculate_circle_area(setup["parachute_diameter"])
+    setup["cansat_area"] = calculate_circle_area(cansat_diameter)
+    setup["parachute_area"] = calculate_circle_area(parachute_diameter)
 
     print("\n=== Mission Setup Complete ===")
     print(f"Mission Name: {mission_name}")
-    print(f"CanSat Cross-Sectional Area: {setup['cansat_area']:.4f} m²")
+    print(f"CanSat Area: {setup['cansat_area']:.4f} m²")
     print(f"Parachute Area: {setup['parachute_area']:.4f} m²")
     print(f"CanSat Drag Coefficient: {cansat_drag_coefficient}")
     print(f"Parachute Drag Coefficient: {parachute_drag_coefficient}")
@@ -122,7 +122,7 @@ def collect_flight_reading(previous_time=None):
         mission_time = get_float_in_range("Mission time (s): ", minimum=0)
         if previous_time is None or mission_time > previous_time:
             break
-        print(f"Mission time must be greater than {previous_time:.1f} seconds.")
+        print(f"Mission time must be greater than {previous_time}.")
 
     altitude = get_float_in_range("Altitude (m): ", minimum=0)
     vertical_velocity = get_float("Vertical velocity (m/s): ")
@@ -153,43 +153,36 @@ def collect_flight_reading(previous_time=None):
     }
 
 # ---------------------------------------------------------
-# PHYSICS CALCULATIONS
+# PHYSICS (Version 0.2)
 # ---------------------------------------------------------
 
 def calculate_measured_acceleration(previous_reading, current_reading):
     if previous_reading is None:
         return None
 
-    delta_velocity = (
-        current_reading["vertical_velocity"]
-        - previous_reading["vertical_velocity"]
-    )
+    dv = current_reading["vertical_velocity"] - previous_reading["vertical_velocity"]
+    dt = current_reading["mission_time"] - previous_reading["mission_time"]
 
-    delta_time = (
-        current_reading["mission_time"]
-        - previous_reading["mission_time"]
-    )
-
-    if delta_time <= 0:
+    if dt <= 0:
         return None
 
-    return delta_velocity / delta_time
+    return dv / dt
 
-def calculate_air_density(pressure, temperature_celsius):
-    temperature_kelvin = temperature_celsius + 273.15
-    if temperature_kelvin <= 0:
+def calculate_air_density(pressure, temp_c):
+    temp_k = temp_c + 273.15
+    if temp_k <= 0:
         return None
-    return pressure / (SPECIFIC_GAS_CONSTANT_AIR * temperature_kelvin)
+    return pressure / (SPECIFIC_GAS_CONSTANT_AIR * temp_k)
 
 def calculate_drag_force(air_density, velocity, drag_coefficient, area):
     if air_density is None:
         return 0.0
     return 0.5 * air_density * velocity**2 * drag_coefficient * area
 
-def calculate_net_vertical_force(weight, drag_force, vertical_velocity):
-    if vertical_velocity < 0:
+def calculate_net_vertical_force(weight, drag_force, velocity):
+    if velocity < 0:
         return weight - drag_force
-    if vertical_velocity > 0:
+    if velocity > 0:
         return weight + drag_force
     return weight
 
@@ -207,17 +200,8 @@ def calculate_physics(setup, reading, previous_reading):
     kinetic_energy = 0.5 * mass * velocity**2
     momentum = mass * velocity
 
-    landing_time = (
-        altitude / abs(velocity)
-        if altitude > 0 and velocity < 0
-        else None
-    )
-
-    wind_drift = (
-        wind_speed * landing_time
-        if landing_time is not None
-        else None
-    )
+    landing_time = altitude / abs(velocity) if altitude > 0 and velocity < 0 else None
+    wind_drift = wind_speed * landing_time if landing_time is not None else None
 
     measured_acceleration = calculate_measured_acceleration(previous_reading, reading)
     air_density = calculate_air_density(reading["pressure"], reading["temperature"])
@@ -238,16 +222,8 @@ def calculate_physics(setup, reading, previous_reading):
         active_area
     )
 
-    net_vertical_force = calculate_net_vertical_force(
-        weight,
-        drag_force,
-        velocity
-    )
-
-    force_based_acceleration = calculate_force_based_acceleration(
-        net_vertical_force,
-        mass
-    )
+    net_vertical_force = calculate_net_vertical_force(weight, drag_force, velocity)
+    force_based_acceleration = calculate_force_based_acceleration(net_vertical_force, mass)
 
     return {
         "weight": weight,
@@ -304,7 +280,7 @@ def generate_warnings(setup, reading):
     return warnings
 
 # ---------------------------------------------------------
-# DISPLAY FUNCTIONS
+# DISPLAY
 # ---------------------------------------------------------
 
 def display_analysis(physics, warnings):
@@ -343,7 +319,6 @@ def display_analysis(physics, warnings):
 
 def display_timesheet(timesheet):
     print("\n=== ASTRA SAT Mission Timesheet ===")
-
     for entry in timesheet:
         reading = entry["reading"]
         status = "; ".join(entry["warnings"]) if entry["warnings"] else "NORMAL"
@@ -379,8 +354,8 @@ def display_mission_summary(setup, timesheet):
     warning_count = sum(
         1
         for entry in timesheet
-        for message in entry["warnings"]
-        if message.startswith(("WARNING", "CRITICAL", "INVALID"))
+        for msg in entry["warnings"]
+        if msg.startswith(("WARNING", "CRITICAL", "INVALID"))
     )
 
     battery_used = setup["starting_battery"] - final_reading["battery_level"]
@@ -411,6 +386,177 @@ def display_mission_summary(setup, timesheet):
     print(f"Maximum Descent Speed: {maximum_descent_speed:.1f} m/s")
     print(f"Warnings Issued: {warning_count}")
     print(f"Mission Result: {landing_result}")
+
+# ---------------------------------------------------------
+# EXPORT FUNCTIONS (Version 0.3)
+# ---------------------------------------------------------
+
+def export_mission_csv(setup, timesheet):
+    os.makedirs("data", exist_ok=True)
+
+    safe_name = setup["mission_name"].strip().lower().replace(" ", "_")
+    filename = f"data/{safe_name}.csv"
+
+    fieldnames = [
+        "reading_number",
+        "mission_time",
+        "altitude",
+        "vertical_velocity",
+        "measured_acceleration",
+        "wind_speed",
+        "wind_direction",
+        "temperature",
+        "pressure",
+        "air_density",
+        "battery_level",
+        "parachute_deployed",
+        "weight",
+        "potential_energy",
+        "kinetic_energy",
+        "momentum",
+        "landing_time",
+        "wind_drift",
+        "drag_force",
+        "net_vertical_force",
+        "force_based_acceleration",
+        "warnings",
+        "notes",
+    ]
+
+    with open(filename, "w", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for entry in timesheet:
+            reading = entry["reading"]
+            physics = entry["physics"]
+
+            writer.writerow({
+                "reading_number": entry["reading_number"],
+                "mission_time": reading["mission_time"],
+                "altitude": reading["altitude"],
+                "vertical_velocity": reading["vertical_velocity"],
+                "measured_acceleration": physics["measured_acceleration"],
+                "wind_speed": reading["wind_speed"],
+                "wind_direction": reading["wind_direction"],
+                "temperature": reading["temperature"],
+                "pressure": reading["pressure"],
+                "air_density": physics["air_density"],
+                "battery_level": reading["battery_level"],
+                "parachute_deployed": reading["parachute_deployed"],
+                "weight": physics["weight"],
+                "potential_energy": physics["potential_energy"],
+                "kinetic_energy": physics["kinetic_energy"],
+                "momentum": physics["momentum"],
+                "landing_time": physics["landing_time"],
+                "wind_drift": physics["wind_drift"],
+                "drag_force": physics["drag_force"],
+                "net_vertical_force": physics["net_vertical_force"],
+                "force_based_acceleration": physics["force_based_acceleration"],
+                "warnings": "; ".join(entry["warnings"]),
+                "notes": reading["notes"],
+            })
+
+    print(f"Mission data exported to {filename}")
+
+
+def export_mission_setup(setup):
+    os.makedirs("data", exist_ok=True)
+
+    safe_name = setup["mission_name"].strip().lower().replace(" ", "_")
+    filename = f"data/{safe_name}_setup.txt"
+
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write("ASTRA SAT Mission Setup\n")
+        file.write("------------------------\n")
+        for key, value in setup.items():
+            file.write(f"{key}: {value}\n")
+
+    print(f"Mission setup exported to {filename}")
+
+
+# ---------------------------------------------------------
+# GRAPH FUNCTIONS
+# ---------------------------------------------------------
+
+def plot_altitude(timesheet, mission_name):
+    os.makedirs("data/graphs", exist_ok=True)
+
+    times = [entry["reading"]["mission_time"] for entry in timesheet]
+    altitudes = [entry["reading"]["altitude"] for entry in timesheet]
+
+    plt.figure()
+    plt.plot(times, altitudes, marker="o")
+    plt.xlabel("Mission Time (s)")
+    plt.ylabel("Altitude (m)")
+    plt.title(f"{mission_name} — Altitude vs Time")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig("data/graphs/altitude_vs_time.png")
+    plt.close()
+
+
+def plot_velocity(timesheet, mission_name):
+    times = [entry["reading"]["mission_time"] for entry in timesheet]
+    velocities = [entry["reading"]["vertical_velocity"] for entry in timesheet]
+
+    plt.figure()
+    plt.plot(times, velocities, marker="o")
+    plt.xlabel("Mission Time (s)")
+    plt.ylabel("Vertical Velocity (m/s)")
+    plt.title(f"{mission_name} — Velocity vs Time")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig("data/graphs/velocity_vs_time.png")
+    plt.close()
+
+
+def plot_battery(timesheet, mission_name):
+    times = [entry["reading"]["mission_time"] for entry in timesheet]
+    battery = [entry["reading"]["battery_level"] for entry in timesheet]
+
+    plt.figure()
+    plt.plot(times, battery, marker="o")
+    plt.xlabel("Mission Time (s)")
+    plt.ylabel("Battery Level (%)")
+    plt.title(f"{mission_name} — Battery vs Time")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig("data/graphs/battery_vs_time.png")
+    plt.close()
+
+
+def plot_acceleration(timesheet, mission_name):
+    valid_entries = [
+        entry for entry in timesheet
+        if entry["physics"]["measured_acceleration"] is not None
+    ]
+
+    if len(valid_entries) < 2:
+        print("Not enough data to create acceleration graph.")
+        return
+
+    times = [entry["reading"]["mission_time"] for entry in valid_entries]
+    accels = [entry["physics"]["measured_acceleration"] for entry in valid_entries]
+
+    plt.figure()
+    plt.plot(times, accels, marker="o")
+    plt.xlabel("Mission Time (s)")
+    plt.ylabel("Measured Acceleration (m/s²)")
+    plt.title(f"{mission_name} — Acceleration vs Time")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig("data/graphs/acceleration_vs_time.png")
+    plt.close()
+
+
+def generate_mission_graphs(setup, timesheet):
+    plot_altitude(timesheet, setup["mission_name"])
+    plot_velocity(timesheet, setup["mission_name"])
+    plot_battery(timesheet, setup["mission_name"])
+    plot_acceleration(timesheet, setup["mission_name"])
+    print("Mission graphs generated.")
+
 
 # ---------------------------------------------------------
 # MAIN PROGRAM LOOP
@@ -447,6 +593,14 @@ def main():
 
     display_timesheet(mission_timesheet)
     display_mission_summary(setup, mission_timesheet)
+
+    if get_yes_no("Export mission data? (yes/no): "):
+        export_mission_csv(setup, mission_timesheet)
+        export_mission_setup(setup)
+
+    if get_yes_no("Generate mission graphs? (yes/no): "):
+        generate_mission_graphs(setup, mission_timesheet)
+
 
 if __name__ == "__main__":
     main()
