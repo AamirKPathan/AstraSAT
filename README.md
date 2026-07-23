@@ -87,3 +87,40 @@ If yes:
 
 ### A CSV file is created in:
 
+data/<mission_name>.csv
+
+
+### Columns include:
+
+- reading_number  
+- mission_time  
+- altitude  
+- vertical_velocity  
+- measured_acceleration  
+- wind_speed  
+- wind_direction  
+- temperature  
+- pressure  
+- air_density  
+- battery_level  
+- parachute_deployed  
+- weight  
+- potential_energy  
+- kinetic_energy  
+- momentum  
+- landing_time  
+- wind_drift  
+- drag_force  
+- net_vertical_force  
+- force_based_acceleration  
+- warnings  
+- notes  
+
+This file contains the complete time-series data for the mission.
+
+---
+
+# Mission Setup Export (Version 0.3)
+
+A second file is created:
+
