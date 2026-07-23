@@ -124,3 +124,28 @@ This file contains the complete time-series data for the mission.
 
 A second file is created:
 
+data/<mission_name>_setup.txt
+
+This contains:
+
+- mission name  
+- mass  
+- CanSat diameter  
+- parachute diameter  
+- CanSat area  
+- parachute area  
+- drag coefficients  
+- starting altitude  
+- starting battery  
+- safe landing speed  
+- maximum safe wind  
+- safe temperature range  
+
+This file stores all configuration values separately from the readings.
+
+---
+
+# Graph Generation (Version 0.3)
+
+If the user agrees:
+
