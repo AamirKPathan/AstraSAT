@@ -227,3 +227,26 @@ Includes:
 1. Install Python 3  
 2. Install Matplotlib:
 
+pip install matplotlib
+
+3. Run:
+
+python main.py
+
+4. Enter mission setup  
+5. Enter flight readings  
+6. Export data and generate graphs if desired  
+
+---
+
+# Future Versions
+
+Version 0.4 may include:
+
+- wind vector physics  
+- improved drag modeling  
+- CSV import  
+- multi-mission comparison  
+- GUI dashboard  
+- 3D descent visualization  
+
