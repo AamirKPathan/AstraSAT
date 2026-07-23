@@ -166,3 +166,64 @@ Acceleration graph automatically skips the first reading (because acceleration i
 
 If fewer than two valid acceleration points exist:
 
+Not enough data to create acceleration graph.
+
+---
+
+# Mission Timesheet
+
+Each reading includes:
+
+- reading number  
+- mission time  
+- altitude  
+- vertical velocity  
+- wind speed  
+- wind direction  
+- temperature  
+- pressure  
+- battery  
+- parachute status  
+- warnings  
+- notes  
+
+---
+
+# Mission Summary
+
+Includes:
+
+- mission name  
+- total readings  
+- final mission time  
+- starting altitude  
+- maximum altitude  
+- final altitude  
+- starting battery  
+- final battery  
+- battery used  
+- minimum battery  
+- maximum wind speed  
+- maximum descent speed  
+- warnings issued  
+- landing classification  
+
+---
+
+# Version 0.3 Limitations
+
+- CSV export does not include graphs  
+- Graphs use simple line plots  
+- No GUI  
+- No real sensor integration  
+- Wind direction is not used in force calculations  
+- Atmospheric conditions assumed constant per reading  
+- Acceleration graph requires at least two valid points  
+
+---
+
+# How to Run
+
+1. Install Python 3  
+2. Install Matplotlib:
+
