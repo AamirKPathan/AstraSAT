@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Download ASTRA SAT Flight Analyzer, a manual-input CanSat mission analyzer for science fair, competition, and classroom use."
+    >
+    <title>ASTRA SAT Flight Analyzer</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Manual Input Edition v1.0</p>
+          <h1>ASTRA SAT Flight Analyzer</h1>
+          <p class="lead">
+            A complete CanSat mission analyzer for manual flight readings,
+            physics calculations, drift estimation, safety checks, exports, and graphs.
+          </p>
+          <div class="actions" aria-label="Primary downloads">
+            <a class="button primary" href="https://github.com/AamirKPathan/AstraSAT/archive/refs/heads/main.zip">
+              Download Package
+            </a>
+            <a class="button secondary" href="https://github.com/AamirKPathan/AstraSAT">
+              View Source
+            </a>
+          </div>
+          <p class="fine-print">
+            Requires Python 3 and matplotlib. No sensors, radios, GPS, or cloud services required.
+          </p>
+        </div>
+        <img
+          class="hero-image"
+          src="assets/astrasat-hero.png"
+          alt="CanSat analyzer concept with a small satellite module, plotted flight data, and lab instruments"
+        >
+      </section>
+
+      <section class="content-grid" aria-label="Project details">
+        <article>
+          <h2>What It Does</h2>
+          <ul>
+            <li>Tracks altitude, velocity, temperature, pressure, wind, battery, and parachute status.</li>
+            <li>Calculates drag, energy, momentum, acceleration, air density, and terminal velocity.</li>
+            <li>Estimates wind drift, horizontal displacement, landing direction, and landing safety.</li>
+            <li>Exports mission summaries, CSV timesheets, and a 10-graph visualization set.</li>
+          </ul>
+        </article>
+
+        <article>
+          <h2>Quick Start</h2>
+          <ol>
+            <li>Download and unzip the package.</li>
+            <li>Install matplotlib with <code>pip install matplotlib</code>.</li>
+            <li>Run <code>python main.py</code> from the project folder.</li>
+            <li>Enter mission setup values and flight readings when prompted.</li>
+          </ol>
+        </article>
+
+        <article>
+          <h2>Designed For</h2>
+          <p>
+            ASTRA SAT is built for science-fair teams, CanSat competitors, and classrooms
+            that need a reliable manual analyzer before moving to a sensor-integrated version.
+          </p>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <span>ASTRA SAT Manual Edition</span>
+      <a href="https://github.com/AamirKPathan/AstraSAT">GitHub Repository</a>
+    </footer>
+  </body>
+</html>
