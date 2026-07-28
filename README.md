@@ -15,6 +15,74 @@ No hardware, sensors, radios, GPS, or telemetry are used in this edition.
 
 ---
 
+# Local Setup and Run
+
+## Prerequisites
+
+- Python 3.10 or newer
+- pip, included with most Python installations
+- A terminal or command prompt
+
+The analyzer uses Python standard-library modules plus one third-party package:
+
+- matplotlib
+
+## Get the Project
+
+Download the package from the demo page, unzip it, and open a terminal in the project folder.
+
+If you prefer Git:
+
+```bash
+git clone https://github.com/AamirKPathan/AstraSAT.git
+cd AstraSAT
+```
+
+## Create a Virtual Environment
+
+Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+macOS/Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+## Install Dependencies
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+## Run Locally
+
+```bash
+python main.py
+```
+
+Follow the terminal prompts to enter mission setup values and flight readings.
+
+Generated CSV files, mission summaries, and graphs are saved under:
+
+```text
+data/
+```
+
+## Troubleshooting
+
+- If `python` is not found on Windows, try `py main.py`.
+- If matplotlib is missing, rerun `python -m pip install -r requirements.txt` inside the activated virtual environment.
+- If graph windows do not open, the graph image files are still saved in `data/graphs/`.
+
+---
+
 # What’s New in Version 1.0
 
 ### ✔ Vector-based wind drift (north/east components)  
@@ -298,22 +366,6 @@ Graphs skip gracefully if insufficient data exists.
 9. Export prompt  
 10. Graph-generation prompt  
 11. Completion message  
-
----
-
-# Installation
-
-Requires Python 3 and Matplotlib:
-
-```
-pip install matplotlib
-```
-
-Run:
-
-```
-python main.py
-```
 
 ---
 
