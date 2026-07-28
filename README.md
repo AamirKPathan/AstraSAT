@@ -7,7 +7,7 @@ Version 1.0 represents the complete and final “manual edition” before the se
 This edition includes all features from v0.1–v0.3 plus major new capabilities such as vector wind drift, horizontal displacement tracking, terminal‑velocity estimation, mission‑phase classification, expanded warnings, full CSV export, full summary export, and a complete 10‑graph visualization suite.
 
 No hardware, sensors, radios, GPS, or telemetry are used in this edition.
-
+Access the package download here (https://aamirkpathan.github.io/AstraSAT/)
 ---
 
 # What’s New in Version 1.0
