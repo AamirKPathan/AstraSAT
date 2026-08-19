@@ -104,8 +104,7 @@ This is the final feature-complete manual-input version.
 
 # Manual Edition Scope
 
-### Included:
-- All v0.1–v0.3 features  
+### Included: 
 - Vector wind drift  
 - Horizontal displacement coordinates  
 - Mission-phase classification  
