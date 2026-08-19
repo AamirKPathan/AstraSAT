@@ -83,7 +83,7 @@ data/
 
 ---
 
-# What’s New in Version 1.0
+# What’s in Version 1.0
 
 ### ✔ Vector-based wind drift (north/east components)  
 ### ✔ Cumulative horizontal position tracking  
