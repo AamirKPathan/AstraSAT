@@ -1,7 +1,7 @@
 # ASTRA SAT Flight Analyzer  
 **Version 1.0 — Complete Manual Input Edition**
 
-ASTRA SAT is a fully manual-input CanSat mission analyzer designed for science‑fair, competition, and educational use.  
+ASTRA SAT is a fully manual-input CanSat mission analyzer designed for educational use.  
 Version 1.0 represents the complete and final “manual edition” before the sensor‑integrated version begins.
 
 This edition includes all features from v0.1–v0.3 plus major new capabilities such as vector wind drift, horizontal displacement tracking, terminal‑velocity estimation, mission‑phase classification, expanded warnings, full CSV export, full summary export, and a complete 10‑graph visualization suite.
