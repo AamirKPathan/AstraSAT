@@ -394,9 +394,3 @@ These belong to the future **sensor-integrated edition**.
 - GUI dashboard  
 
 ---
-
-# License
-
-Educational use permitted.  
-Not intended for real aerospace navigation or safety-critical deployment.
-
