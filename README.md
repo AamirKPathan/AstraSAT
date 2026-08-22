@@ -17,4 +17,7 @@ It includes vector wind drift, horizontal displacement tracking, terminal-veloci
 
 ## Prerequisites
 
-- Python 3.10 
+- Python 3.10 or newer
+- A terminal or command prompt
+
+ASTRA 
