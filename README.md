@@ -25,4 +25,6 @@ ASTRA SAT uses Python's standard library plus on external library
 
 ## Get The Project
 
-Download the ZIP from the demo page, unzip it, and open a
+Download the ZIP from the demo page, unzip it, and open a terminal inside the project folder.
+
+Or you can clone with Git:
