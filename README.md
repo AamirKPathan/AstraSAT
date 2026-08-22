@@ -32,4 +32,5 @@ Or you can clone with Git:
 git clone https://github.com/AamirKPathan/AstraSAT.git
 cd AstraSAT
 ```
-## Create a Vitu
+## Create a Virtual Environment
+Windows:
