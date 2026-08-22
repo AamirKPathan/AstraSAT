@@ -10,3 +10,7 @@ It includes vector wind drift, horizontal displacement tracking, terminal-veloci
 ## Demo And Download
 - Demo page: https://aamirkpathan.github.io/AstraSAT/
 - Direct download: https://github.com/AamirKPathan/AstraSAT/archive/refs/heads/main.zip
+
+---
+
+# Local Setup and Run
