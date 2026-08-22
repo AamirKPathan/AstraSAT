@@ -3,34 +3,29 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta
-      name="description"
-      content="Download ASTRA SAT Flight Analyzer, a manual-input CanSat mission analyzer for science fair, competition, and classroom use."
-    >
+    <meta name="description" content="Run a lightweight ASTRA SAT CanSat flight analysis directly in your browser.">
     <title>ASTRA SAT Flight Analyzer</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
   </head>
   <body>
     <main>
-      <section class="hero">
+      <nav class="topbar" aria-label="Main navigation">
+        <a class="brand" href="#top"><span class="brand-mark">A</span><span>ASTRA SAT</span></a>
+        <div class="nav-links"><a href="#analyzer">Analyzer</a><a href="#method">Method</a><a href="https://github.com/AamirKPathan/AstraSAT">Source <span aria-hidden="true">↗</span></a></div>
+      </nav>
+      <section class="hero" id="top">
         <div class="hero-copy">
-          <p class="eyebrow">Manual Input Edition v1.0</p>
-          <h1>ASTRA SAT Flight Analyzer</h1>
+          <p class="eyebrow"><span class="status-dot"></span> Browser demo · Manual Input Edition</p>
+          <h1>Read the flight.<br><em>Understand</em> the mission.</h1>
           <p class="lead">
-            A complete CanSat mission analyzer for manual flight readings,
-            physics calculations, drift estimation, safety checks, exports, and graphs.
+            Turn a handful of field readings into a clear picture of descent, drift, and landing safety.
           </p>
           <div class="actions" aria-label="Primary downloads">
-            <a class="button primary" href="https://github.com/AamirKPathan/AstraSAT/archive/refs/heads/main.zip">
-              Download Package
-            </a>
-            <a class="button secondary" href="https://github.com/AamirKPathan/AstraSAT">
-              View Source
-            </a>
+            <a class="button primary" href="#analyzer">Open analyzer <span aria-hidden="true">↓</span></a>
+            <a class="button secondary" href="https://github.com/AamirKPathan/AstraSAT/archive/refs/heads/main.zip">Download Python edition <span aria-hidden="true">↗</span></a>
           </div>
-          <p class="fine-print">
-            Requires Python 3 and matplotlib. No sensors, radios, GPS, or cloud services required.
-          </p>
+          <div class="hero-note"><span>01</span><p>No account. No upload. Your readings stay in this browser.</p></div>
         </div>
         <img
           class="hero-image"
@@ -39,40 +34,36 @@
         >
       </section>
 
-      <section class="content-grid" aria-label="Project details">
-        <article>
-          <h2>What It Does</h2>
-          <ul>
-            <li>Tracks altitude, velocity, temperature, pressure, wind, battery, and parachute status.</li>
-            <li>Calculates drag, energy, momentum, acceleration, air density, and terminal velocity.</li>
-            <li>Estimates wind drift, horizontal displacement, landing direction, and landing safety.</li>
-            <li>Exports mission summaries, CSV timesheets, and a 10-graph visualization set.</li>
-          </ul>
-        </article>
-
-        <article>
-          <h2>Quick Start</h2>
-          <ol>
-            <li>Download and unzip the package.</li>
-            <li>Install matplotlib with <code>pip install matplotlib</code>.</li>
-            <li>Run <code>python main.py</code> from the project folder.</li>
-            <li>Enter mission setup values and flight readings when prompted.</li>
-          </ol>
-        </article>
-
-        <article>
-          <h2>Designed For</h2>
-          <p>
-            ASTRA SAT is built for science-fair teams, CanSat competitors, and classrooms
-            that need a reliable manual analyzer before moving to a sensor-integrated version.
-          </p>
-        </article>
+      <section class="analyzer" id="analyzer">
+        <div class="section-heading"><div><p class="eyebrow">Live mission sandbox</p><h2>Run a flight check</h2></div><span class="chip">Local calculation</span></div>
+        <form id="flight-form">
+          <div class="form-block"><p class="block-label">Mission setup</p><div class="field-grid">
+            <label>Mission name<input id="mission-name" value="Astra test flight" type="text"></label>
+            <label>CanSat mass <span>(kg)</span><input id="mass" value="0.35" type="number" min="0.01" step="0.01"></label>
+            <label>Start altitude <span>(m)</span><input id="altitude" value="120" type="number" min="0" step="1"></label>
+            <label>Safe landing speed <span>(m/s)</span><input id="safe-speed" value="8" type="number" min="0.1" step="0.1"></label>
+          </div></div>
+          <div class="form-block"><p class="block-label">Latest reading</p><div class="field-grid">
+            <label>Mission time <span>(s)</span><input id="time" value="42" type="number" min="0" step="1"></label>
+            <label>Vertical velocity <span>(m/s)</span><input id="velocity" value="-6.4" type="number" step="0.1"></label>
+            <label>Wind speed <span>(m/s)</span><input id="wind" value="4.8" type="number" min="0" step="0.1"></label>
+            <label>Wind direction <span>(° from north)</span><input id="direction" value="62" type="number" min="0" max="360" step="1"></label>
+          </div></div>
+          <button class="button primary calculate" type="submit">Calculate mission state <span aria-hidden="true">→</span></button>
+        </form>
+        <div class="results" aria-live="polite">
+          <div class="result-primary"><p class="result-label">Mission state</p><strong id="landing-state">SAFE LANDING</strong><p id="state-detail">Within configured descent limits.</p></div>
+          <div class="metric"><span>Descent time</span><strong id="descent-time">18.8 s</strong></div><div class="metric"><span>Wind drift</span><strong id="wind-drift">90.2 m</strong></div><div class="metric"><span>Landing bearing</span><strong id="bearing">NE · 62°</strong></div>
+        </div>
+        <div class="flight-visual"><div class="visual-header"><span>Projected flight profile</span><span id="profile-caption">Altitude / time</span></div><div class="chart" aria-label="Projected altitude descent chart"><div class="chart-line"></div><span class="axis-y">120 m</span><span class="axis-zero">0 m</span><span class="axis-x">0 s <b>·</b> 42 s</span></div></div>
+      </section>
+      <section class="method" id="method"><div><p class="eyebrow">What is measured</p><h2>Small inputs.<br>Useful answers.</h2></div><div class="method-list"><div><span>01</span><p><b>Descent profile</b><br>Estimate time to ground from current altitude and vertical velocity.</p></div><div><span>02</span><p><b>Vector drift</b><br>Resolve wind into north and east components for a landing bearing.</p></div><div><span>03</span><p><b>Safety state</b><br>Compare descent speed against your mission's configured safe limit.</p></div></div></section>
       </section>
     </main>
 
     <footer>
-      <span>ASTRA SAT Manual Edition</span>
-      <a href="https://github.com/AamirKPathan/AstraSAT">GitHub Repository</a>
+      <span>ASTRA SAT · Manual Edition v1.0</span>
+      <a href="https://github.com/AamirKPathan/AstraSAT">GitHub Repository ↗</a>
     </footer>
   </body>
 </html>
