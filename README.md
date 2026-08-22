@@ -52,4 +52,5 @@ python -m pip install -r requirements.txt
 
 ## Troubleshooting
 - If python isn't recognized on Windows, try py main.py
-- If matplotlib is missing, reinstall with pyt
+- If matplotlib is missing, reinstall with python-m pip install -r requirements.txt
+- If graph windows don't open the imagesa r
