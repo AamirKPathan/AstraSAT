@@ -20,4 +20,5 @@ It includes vector wind drift, horizontal displacement tracking, terminal-veloci
 - Python 3.10 or newer
 - A terminal or command prompt
 
-ASTRA 
+ASTRA SAT uses Python's standard library plus on external library
+    - matplot
