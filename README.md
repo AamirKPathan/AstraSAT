@@ -46,4 +46,6 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 
 ## Run The Analyzer
-`.python main.py
+1. python main.py
+2. Follow the prompts
+3. All files and e
