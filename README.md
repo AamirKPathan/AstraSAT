@@ -41,4 +41,9 @@ Mac/Linux
 python3 -m venv .venv
 source .venv/bin/activate
 
-## Install Dep
+## Install Dependencies
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+
+## Run The Analyzer
+`.python main.py
