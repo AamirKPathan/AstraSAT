@@ -14,3 +14,7 @@ It includes vector wind drift, horizontal displacement tracking, terminal-veloci
 ---
 
 # Local Setup and Run
+
+## Prerequisites
+
+- Python 3.10 
