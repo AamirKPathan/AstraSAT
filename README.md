@@ -51,4 +51,5 @@ python -m pip install -r requirements.txt
 3. All files and exports will be saved under data/
 
 ## Troubleshooting
-- If python isn't recognized on Windows, try
+- If python isn't recognized on Windows, try py main.py
+- If matplotlib is missing, reinstall with pyt
