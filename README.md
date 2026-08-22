@@ -34,3 +34,6 @@ cd AstraSAT
 ```
 ## Create a Virtual Environment
 Windows:
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
