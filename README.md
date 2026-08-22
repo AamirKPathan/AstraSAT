@@ -28,6 +28,6 @@ ASTRA SAT uses Python's standard library plus on external library
 Download the ZIP from the demo page, unzip it, and open a terminal inside the project folder.
 
 Or you can clone with Git:
-```bash
+`bash
 git clone https://github.com/AamirKPathan/AstraSAT.git
 cd AstraSAT
