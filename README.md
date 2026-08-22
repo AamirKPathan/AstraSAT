@@ -48,4 +48,4 @@ python -m pip install -r requirements.txt
 ## Run The Analyzer
 1. python main.py
 2. Follow the prompts
-3. All files and e
+3. All files and exports will be saved under data/
